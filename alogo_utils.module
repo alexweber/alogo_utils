@@ -1,0 +1,122 @@
+<?php
+
+/**
+ * Convert a string to a slug, safe for use in urls
+ * @param string
+ * @return string
+ */
+function alogo_to_slug($string){
+	$string = str_replace(array('/', ' ', '&'), '-', $string);
+  $accents = '/&([A-Za-z]{1,2})(tilde|grave|acute|circ|cedil|uml|lig);/';
+  return urlencode(strtolower(preg_replace($accents, '$1', htmlentities(utf8_decode($string)))));
+}
+
+/**
+ * Implementation of hook_cron().
+ */
+function alogo_utils_cron() {
+  $resource = db_query("SHOW tables");
+  $tables = array();
+  
+  while($row = db_fetch_array($resource)) {
+    $tables[] = current($row);
+  }
+  
+  $query = 'OPTIMIZE TABLE ' . implode(', ', $tables);
+  $result = db_query($query);
+  
+  if($result === false) {
+    watchdog('alogo_utils', 'Error Optimizing Database, query: %query', array('%query' => $query), WATCHDOG_ERROR);
+  }else{
+    watchdog('alogo_utils', 'Optimized Database');
+  }
+}
+
+/**
+ * Retorna representação por extensa do mes em Portugues
+ * @param int $timestamp
+ * @param bool [$abbreviation]
+ * @return string
+ */
+function alogo_get_month($timestamp, $abbreviation = false) {
+  $m = date('n', $timestamp);
+  
+  switch ($m) {
+    case 1:
+      $month = 'janeiro';
+      break;
+    case 2:
+      $month = 'fevereiro';
+      break;
+    case 3:
+      $month = 'março';
+      break;
+    case 4:
+      $month = 'abril';
+      break;
+    case 5:
+      $month = 'maio';
+      break;
+    case 6:
+      $month = 'junho';
+      break;
+    case 7:
+      $month = 'julho';
+      break;
+    case 8:
+      $month = 'agosto';
+      break;
+    case 9:
+      $month = 'setembro';
+      break;
+    case 10:
+      $month = 'outubro';
+      break;
+    case 11:
+      $month = 'novembro';
+      break;
+    case 12:
+      $month = 'dezembro';
+      break;
+    default:
+      $month = strtolower(date('F', $timestamp));
+  }
+
+  return ($abbreviation === false) ? $month : substr($month, 0, 3);
+}
+
+/**
+ * Retorna o dia da semana por extenso em Portugês
+ * @param int $timestamp
+ * @param bool [$abbreviation]
+ * @return string
+ */
+function alogo_get_day($timestamp, $abbreviation = false) {
+  $d = date('w', $timestamp);
+  
+  switch ($d) {
+    case 0:
+      $day = 'domingo';
+      break;
+    case 1:
+      $day = 'segunda';
+      break;
+    case 2:
+      $day = 'terça';
+      break;
+    case 3:
+      $day = 'quarta';
+      break;
+    case 4:
+      $day = 'quinta';
+      break;
+    case 5:
+      $day = 'sexta';
+      break;
+    case 6:
+      $day = 'sábado';
+      break;
+  }
+  
+  return ($abbreviation === false) ? $day : substr($day, 0, 3);
+}
