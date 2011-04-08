@@ -1,0 +1,7 @@
+; $Id$
+name = Alogo Redirect
+description = It's a magical tool for redirecting stuff.
+core = 6.x
+package = Alogo Utils
+
+project = "alogo_utils"
