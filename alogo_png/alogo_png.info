@@ -1,0 +1,6 @@
+name = Alogo PNG
+description = PNG transparency fix for Internet Explore 6 and below using VML instead of Microsoft's AlphaImageLoader filter. Original DD_belatedPNG script by Drew Diller.
+project = alogo_png
+package = Alogo Utils
+core = 6.x
+version = "6.x-1.0"

@@ -1,0 +1,63 @@
+<?php
+
+/**
+* Implementation of hook_help().
+*/
+function alogo_png_help($path = '', $arg = NULL) {
+  $output = '';
+  switch ($path) {
+    case 'admin/help#alogo_png':
+    case 'admin/settings/alogo_png':
+      $output = '<p>'. t('Unlike other PNG fix scripts for IE6, DD_belatedpng ensure that background-position and background-repeat are properly supported and fixes the grey background issue.'). '</p>
+			<p>'.t('There is no usage of AlphaImageLoader, so script doesn\'t have the buggy z-indexing associated with that filter.').'</p><p>DD_belatedpng was made by <a href="http://www.dillerdesign.com/experiment/DD_belatedpng/">Drew Diller</a></p>';
+      break;
+  }
+  return $output;
+}
+
+/**
+ * Implementation of hook_init().
+ */ 
+function alogo_png_init() {
+  $alogo_pngapply = variable_get('alogo_png_selectors', '');
+  // Split each line so we can implode them later on
+  $alogo_pngapply = preg_split('/[\n|\r|\r\n|,]+/', strip_tags($alogo_pngapply));
+  $alogo_pngapply = implode(',', $alogo_pngapply);
+  if (!empty($alogo_pngapply)) {
+    drupal_set_html_head('<!--[if lt IE 7]>
+<script type="text/javascript" src="'. base_path() . drupal_get_path('module', 'alogo_png') . '/DD_belatedPNG_0.0.8a-min.js"></script>
+<script type="text/javascript">
+  DD_belatedpng.fix("' . $alogo_pngapply . '");
+</script>															 
+<![endif]-->');
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */ 
+function alogo_png_menu() {
+  $items = array();
+  $items['admin/settings/alogo_png'] = array(
+    'title' => t('Alogo PNG Settings'),
+    'description' => t('Configure alogo_png.'),
+    'access arguments' => array('administer site configuration'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('alogo_png_admin')
+  );
+  return $items;
+}
+
+/**
+ * Admin settings form
+ */ 
+function alogo_png_admin() {
+  $form = array();
+  $form['alogo_png_selectors'] = array(
+    '#type' => 'textarea',
+    '#title' => t('CSS Classes/Selectors to <em>Include</em>'),
+    '#default_value' => variable_get('alogo_png_selectors', "img\n.pngfix"),
+    '#description' => t('CSS/jQuery selectors including tag, class, id where to apply the PNG. For example use <code>#alogo_png</code> for ID, <code>.alogo_png</code> for classes, <code>img</code> for tags, and/or <code>#belatedid, .belatedclass, img</code> for combinations. Input one selector per line without comma (try to use the plain text editor instead of the WYSIWYG when editing)')
+  );
+  return system_settings_form($form);
+}
