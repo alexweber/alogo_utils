@@ -1,0 +1,8 @@
+; $Id$
+name = Alogo Fancybox
+description = Simple module to include jQuery Fancybox plugin
+core = 6.x
+package = Alogo Utils
+version = "6.x-1.0"
+
+project = "alogo_fancybox"
