@@ -2,6 +2,7 @@
 
 /**
  * Implementation of hook_init()
+ * @TODO enable mousewheel option
  */
 function alogo_fancybox_init() {
   drupal_add_css(drupal_get_path('module', 'alogo_fancybox') . '/fancybox/jquery.fancybox-1.3.4.css');
