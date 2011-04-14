@@ -12,6 +12,26 @@ function alogo_to_slug($string){
 }
 
 /**
+ * Valida um CPF
+ * @param string
+ * @return bool
+ */
+function alogo_validate_cpf($cpf) {
+  $regex = '/^[0-9]{3}(.)?[0-9]{3}(.)?[0-9]{3}(-)?[0-9]{2}$/';
+  return (bool) preg_match($regex, $cpf);
+}
+
+/**
+ * Valida um Email
+ * @param string
+ * @return bool
+ */
+function alogo_validate_email($email) {
+  $regex = "/^[a-z0-9]+[a-z0-9\?\.\+-_]*"."@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]+$/";
+  return (bool) preg_match($regex, $email);
+}
+
+/**
  * Implementation of hook_cron().
  */
 function alogo_utils_cron() {
