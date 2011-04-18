@@ -3,5 +3,5 @@ name = Alogo Redirect
 description = It's a magical tool for redirecting stuff.
 core = 6.x
 package = Alogo Utils
-
+version = "6.x-1.0"
 project = "alogo_utils"
