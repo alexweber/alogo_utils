@@ -12,6 +12,32 @@ function alogo_to_slug($string){
 }
 
 /**
+ * Return absolute drupal site root
+ * @return string
+ */
+function alogo_docroot() {
+  $absolute_dir = dirname(__FILE__);
+  $relative_dir = drupal_get_path('module', 'alogo_utils');
+  return substr($absolute_dir, 0, -1 * (1 + strlen($relative_dir)));
+}
+
+/**
+ * Calculate age from birthday
+ * @param string $bday
+ *  - birthday (dd-mm-yyyy)
+ */
+function alogo_get_age($bday){
+	list($d, $m, $y) = explode('-', $bday);
+	$yd = date('Y') - $y;
+	
+	if (date('md') < $m.$d){
+		--$yd;
+	}
+	
+	return $yd;
+}
+
+/**
  * Validação de CPF
  * @param string $cpf
  * @param bool $strict
