@@ -6,36 +6,36 @@
 
 //The magical unicorn redirection tool
 function alogo_goto() {
-	$semaphore = variable_get('cron_semaphore', FALSE);
+  $semaphore = variable_get('cron_semaphore', FALSE);
 
-	if (!$semaphore) {
-		// Pass-thru to the magical unicorn, and transform water into wine
-		$args = func_get_args();
-		call_user_func_array('drupal_goto', $args);
-	} 
+  if (!$semaphore) {
+    // Pass-thru to the magical unicorn, and transform water into wine
+    $args = func_get_args();
+    call_user_func_array('drupal_goto', $args);
+  }
 }
 
-
 //A black hat unicorn tool which gets the last Node for a given Type
-function _alogo_redirect_last_node_by_type( $tipo ) {
-  $nid = db_result(db_query("SELECT nid FROM {node} where type = '%s' order by created desc limit 1",$tipo));
-  alogo_goto("node/". $nid);
+function _alogo_redirect_last_node_by_type($tipo) {
+  $nid = db_result(db_query("SELECT nid FROM {node} where type = '%s' order by created desc limit 1", $tipo));
+  alogo_goto("node/" . $nid);
   return;
 }
 
-function _alogo_redirect_filter($text){
-    alogo_goto($text);
-    exit;
+function _alogo_redirect_filter($text) {
+  alogo_goto($text);
+  exit;
 }
 
 /*
  * Alogo implementation of hook_filter();
  */
+
 function alogo_redirect_filter($op, $delta = 0, $format = -1, $text = '') {
   $semaphore = variable_get('cron_semaphore', FALSE);
 
   if ($op == 'list') {
-  	return array(
+    return array(
       0 => t('Alogo Redirect filter'),
       1 => t('Alogo Node Type last node redirect filter')
     );
@@ -54,10 +54,10 @@ function alogo_redirect_filter($op, $delta = 0, $format = -1, $text = '') {
           $pattern = '/(alogo\-redirect\:)([a-zA-Z0-9\/\_]+)/';
           preg_match($pattern, $text, $match);
           $text = preg_replace($pattern, "", $text);
-          
-          if(!$semaphore && is_array($match)){
-            if(isset ($match[2])){
-               _alogo_redirect_filter($match[2]);
+
+          if (!$semaphore && is_array($match)) {
+            if (isset($match[2])) {
+              _alogo_redirect_filter($match[2]);
             }
           }
           return $text;
@@ -77,30 +77,29 @@ function alogo_redirect_filter($op, $delta = 0, $format = -1, $text = '') {
           preg_match($pattern, $text, $match);
           $text = preg_replace($pattern, "", $text);
 
-          if(!$semaphore && is_array($match)){
-            if(isset ($match[2])){
-                _alogo_redirect_last_node_by_type($match[2]);
+          if (!$semaphore && is_array($match)) {
+            if (isset($match[2])) {
+              _alogo_redirect_last_node_by_type($match[2]);
             }
           }
           return $text;
-
       }
       break;
   }
 }
 
-
 /*
  * Alogo implementation of hook_filter_tips();
  */
+
 function alogo_redirect_filter_tips($delta, $format, $long = FALSE) {
   switch ($delta) {
     case 0:
-        return t('Allow user to create nodes redirection with alogo-redirect:node-where-to-go (Only works for drupal content)');
+      return t('Allow user to create nodes redirection with alogo-redirect:node-where-to-go (Only works for drupal content)');
       break;
 
     case 1:
-        return t('Allow user to create nodes redirection with alogo-type-redirect:node-type');
+      return t('Allow user to create nodes redirection with alogo-type-redirect:node-type');
       break;
   }
 }

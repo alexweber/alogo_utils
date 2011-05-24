@@ -1,7 +1,6 @@
-; $Id$
 name = Alogo Utils
 description = Alogo, from Greek, is a horse who is able to do mysterious and amazing things. Based on greek mythology, some claim it is a unicorn, although we will never know for sure.
 core = 6.x
 package = Alogo Utils
-version = "6.x-1.0"
+version = "6.x-1.0-dev"
 project = "alogo_utils"

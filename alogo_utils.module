@@ -1,12 +1,15 @@
 <?php
+/**
+ * @file Alogo Utils
+ */
 
 /**
  * Convert a string to a slug, safe for use in urls
  * @param string
  * @return string
  */
-function alogo_to_slug($string){
-	$string = str_replace(array('/', ' ', '&'), '-', $string);
+function alogo_to_slug($string) {
+  $string = str_replace(array('/', ' ', '&'), '-', $string);
   $accents = '/&([A-Za-z]{1,2})(tilde|grave|acute|circ|cedil|uml|lig);/';
   return urlencode(strtolower(preg_replace($accents, '$1', htmlentities(utf8_decode($string)))));
 }
@@ -26,15 +29,15 @@ function alogo_docroot() {
  * @param string $bday
  *  - birthday (dd-mm-yyyy)
  */
-function alogo_get_age($bday){
-	list($d, $m, $y) = explode('-', $bday);
-	$yd = date('Y') - $y;
-	
-	if (date('md') < $m.$d){
-		--$yd;
-	}
-	
-	return $yd;
+function alogo_get_age($bday) {
+  list($d, $m, $y) = explode('-', $bday);
+  $yd = date('Y') - $y;
+
+  if (date('md') < $m . $d) {
+    --$yd;
+  }
+
+  return $yd;
 }
 
 /**
@@ -90,7 +93,7 @@ function alogo_validate_cnpj($cnpj) {
   if (drupal_strlen($cpf) !== 14 || in_array($cnpj, $forbidden)) {
     return FALSE;
   }
-  
+
   $i = 0;
   while ($i < 14) {
     $cnpj_d[$i] = drupal_substr($cnpj, $i, 1);
@@ -135,17 +138,17 @@ function alogo_validate_cnpj($cnpj) {
 function alogo_utils_cron() {
   $resource = db_query("SHOW tables");
   $tables = array();
-  
-  while($row = db_fetch_array($resource)) {
+
+  while ($row = db_fetch_array($resource)) {
     $tables[] = current($row);
   }
-  
+
   $query = 'OPTIMIZE TABLE ' . implode(', ', $tables);
   $result = db_query($query);
-  
-  if($result === false) {
+
+  if ($result === false) {
     watchdog('alogo_utils', 'Error Optimizing Database, query: %query', array('%query' => $query), WATCHDOG_ERROR);
-  }else{
+  } else {
     watchdog('alogo_utils', 'Optimized Database');
   }
 }

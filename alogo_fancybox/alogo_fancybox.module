@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file Alogo Fancybox Drupal hooks
+ */
 
 /**
  * Implementation of hook_init()
