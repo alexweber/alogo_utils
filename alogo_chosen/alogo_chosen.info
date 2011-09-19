@@ -1,0 +1,6 @@
+name = Alogo Chosen
+description = Implements jQuery Chosen plugin
+core = 6.x
+package = Alogo Utils
+version = "6.x-1.0"
+project = "alogo_chosen"
