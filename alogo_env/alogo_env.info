@@ -1,0 +1,6 @@
+core = "6.x"
+description = "Tools for dealing with different server environments such as Development, Staging and Production."
+name = "Alogo Env"
+package = "Alogo Utils"
+project = "alogo_env"
+version = "6.x-1.0"

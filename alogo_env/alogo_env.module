@@ -1,0 +1,7 @@
+<?php
+
+/**
+ * @file Alogo Env Module
+ */
+
+// Drupal needs this empty file, go see alogo_env.drush.inc
