@@ -4,6 +4,20 @@
  */
 
 /**
+ * Implementation of hook_cron().
+ */
+function alogo_utils_cron() {
+  $resource = db_query("SHOW tables");
+  $tables = array();
+
+  while ($row = db_result($resource)) {
+    $tables[] = $row;
+  }
+
+  db_query('OPTIMIZE TABLE ' . implode(', ', $tables));
+}
+
+/**
  * Convert a string to a slug, safe for use in urls
  * @param string
  * @return string
@@ -22,6 +36,15 @@ function alogo_docroot() {
   $absolute_dir = dirname(__FILE__);
   $relative_dir = drupal_get_path('module', 'alogo_utils');
   return substr($absolute_dir, 0, -1 * (1 + strlen($relative_dir)));
+}
+
+/**
+ * Wrapper around krumo() that includes the class if not already done
+ * This is useful for debugging hook_init() and other places where krumo isn't normally available
+ */
+function alogo_dump() {
+  include_once drupal_get_path('module', 'devel') . '/krumo/class.krumo.php';
+  krumo(func_get_args());
 }
 
 /**
@@ -130,25 +153,4 @@ function alogo_validate_cnpj($cnpj) {
   }
 
   return TRUE;
-}
-
-/**
- * Implementation of hook_cron().
- */
-function alogo_utils_cron() {
-  $resource = db_query("SHOW tables");
-  $tables = array();
-
-  while ($row = db_fetch_array($resource)) {
-    $tables[] = current($row);
-  }
-
-  $query = 'OPTIMIZE TABLE ' . implode(', ', $tables);
-  $result = db_query($query);
-
-  if ($result === false) {
-    watchdog('alogo_utils', 'Error Optimizing Database, query: %query', array('%query' => $query), WATCHDOG_ERROR);
-  } else {
-    watchdog('alogo_utils', 'Optimized Database');
-  }
 }
