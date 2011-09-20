@@ -9,8 +9,8 @@
  */
 function alogo_env_drush_help($section) {
   switch ($section) {
-    case 'envswitch':
-      return t('Switches website environment beteen development, staging and production mode.');
+    case 'env':
+      return t('Switches website environment between development, staging and production mode.');
   }
 }
 
@@ -19,17 +19,17 @@ function alogo_env_drush_help($section) {
  */
 function alogo_env_drush_command() {
   return array(
-    'envswitch' => array(
-      'callback' => '_alogo_env_drush_envswitch',
-      'description' => t("Switches website environment beteen development, staging and production mode. Specify the environment as an argument: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment."),
+    'env' => array(
+      'callback' => '_alogo_env_drush_env',
+      'description' => t("Switches website environment between development, staging and production mode. Specify the environment as an argument: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment."),
       'aliases' => array('es'),
       'arguments' => array(
         'env' => t("Optional. Specify the environment: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment."),
       ),
       'examples' => array(
-        'drush envswitch d' => t('Put the site in development mode'),
-        'drush envswitch s' => t('Put the site in staging mode'),
-        'drush envswitch t' => t('Put the site in production mode'),
+        'drush env d' => t('Put the site in development mode'),
+        'drush env s' => t('Put the site in staging mode'),
+        'drush env t' => t('Put the site in production mode'),
       ),
     ),
   );
@@ -40,12 +40,12 @@ function alogo_env_drush_command() {
  */
 
 /**
- * Router for 'envswitch' drush command
+ * Router for 'env' drush command
  *
  * @param string $env
  * @return bool
  */
-function _alogo_env_drush_envswitch($env) {
+function _alogo_env_drush_env($env) {
   $modules = array(
     'dev' => array(
       'bulk_export',
