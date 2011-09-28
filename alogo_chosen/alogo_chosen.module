@@ -1,14 +1,15 @@
 <?php
-/**
- * @file Alogo Chosen module
- *.
 
 /**
+ * @file Alogo Chosen module
+ * .
+
+  /**
  * Implements hook_init().
  */
 function alogo_chosen_init() {
-	// Don't add in admin or node edit/delete pages
-  if (arg(0) !== 'admin' && (arg(0) !== 'node') || !arg(2))) {
+  // Don't add in admin or node edit/delete pages
+  if (arg(0) !== 'admin' && (arg(0) !== 'node' || !arg(2))) {
     drupal_add_js(drupal_get_path('module', 'alogo_chosen') . '/chosen/chosen.jquery.min.js');
     drupal_add_css(drupal_get_path('module', 'alogo_chosen') . '/chosen/chosen.css');
     drupal_add_css(drupal_get_path('module', 'alogo_chosen') . '/alogo_chosen.css');
