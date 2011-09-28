@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file Alogo Utils
  */
@@ -64,6 +65,19 @@ function alogo_get_age($bday) {
 }
 
 /**
+ * Clean the string removing all characters except the digits
+ * Talen from the module "Brazilian IDs"
+ *
+ * @param $cpfcnpj
+ *   Original "dirty" cpfcnpf
+ * @return
+ *   Returns the clean cpfcnpj
+ */
+function alogo_clean_cpf($cpf) {
+  return preg_replace('/[^0-9]/', '', $cpf);
+}
+
+/**
  * Validação de CPF
  * @param string $cpf
  * @param bool $strict
@@ -73,7 +87,9 @@ function alogo_validate_cpf($cpf, $strict = FALSE) {
   if ($strict === FALSE) {
     $regex = '/^[0-9]{3}(.)?[0-9]{3}(.)?[0-9]{3}(-)?[0-9]{2}$/';
     return (bool) preg_match($regex, $cpf);
-  } else {
+  }
+  else {
+    $cpf = alogo_clean_cpf($cpf);
     $forbidden = array('00000000000', '11111111111', '22222222222', '33333333333', '44444444444', '55555555555', '66666666666', '77777777777', '88888888888', '99999999999');
 
     // Check if its not a forbidden combination
@@ -100,8 +116,40 @@ function alogo_validate_cpf($cpf, $strict = FALSE) {
         return FALSE;
       }
     }
+
     return TRUE;
   }
+}
+
+/**
+ * Informa se o CPF é único
+ * Função feita para uso com o content_profile
+ *
+ * @param string $cpf
+ * @param int $uid
+ * @param string $profile_table
+ * @param string $profile_field
+ * @return bool
+ */
+function alogo_unique_cpf($cpf, $uid = NULL, $profile_table = 'content_type_profile', $profile_field = 'field_profile_cpf_value') {
+  $cpf_dirty = alogo_clean_cpf($cpf);
+
+  $query = <<<SQL
+SELECT COUNT(*) FROM {$profile_table} ctt
+INNER JOIN node n ON ctt.nid = n.nid
+WHERE ctt.{$profile_field} = '%s' OR ctt.{$profile_field} = '%s'
+SQL;
+  $args = array($cpf, $cpf_dirty);
+
+  if ($uid) {
+    $query .= " AND n.uid <> %d";
+    $args[] = $uid;
+  }
+
+  array_unshift($args, $query);
+  $resource = call_user_func_array('db_query', $args);
+  $result = db_result($resource);
+  return $result == 0;
 }
 
 /**
