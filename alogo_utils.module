@@ -5,6 +5,86 @@
  */
 
 /**
+ * Retrieve a record from the databased based on a schema.
+ * 
+ * @param string $schema
+ * @param mixed $key A single value or an array of values
+ * @return array
+ */
+function alogo_utils_read_record($schema, $key) {
+  $key = (array) $key;
+  $schema = drupal_get_schema($schema);
+  
+  if (!$schema) {
+    return FALSE;
+  }
+  
+  $pks = $schema['primary key'];
+
+  // make sure we have the same ammount of values as we do primary keys
+  $count = count($key);
+  if ($count !== count($pks)) {
+    return FALSE;
+  }
+
+  // build query
+  $query = "SELECT * FROM {$schema['name']} WHERE";
+
+  for ($i = 0; $i < $count; ++$i) {
+    // escape % signs
+    $name = str_replace('%', '%%', $pks[$i]);
+    $query .= " {$name} = ";
+    
+    // determine variable type
+    if (is_numeric($key[$i])) {
+      $quotes = FALSE;
+      if (is_int($key[$i]) || ctype_digit($key[$i])) {
+        $placeholder = '%d';
+      }
+      else {
+        $placeholder = '%f';
+      }
+    } else {
+      // primary keys shouldn't really be binary in the first place
+      $placeholder = '%s';
+      $quotes = TRUE;
+    }
+    
+    if ($quotes) {
+      $query .= '"';
+    }
+    
+    $query .= $placeholder;
+    
+    if ($quotes) {
+      $query .= '"';
+    }
+  }
+
+  $result = db_query($query, $key);
+  return db_fetch_object($result);
+}
+
+/**
+ * Returns whether a user has a particular role
+ * Roles can either be a numeric RID or a string
+ * 
+ * @param int|string $role
+ * @param int $uid 
+ * @return bool
+ */
+function alogo_utils_user_has_role($role, $uid = NULL) {
+  // defalts to current user
+  if (!$uid) {
+    global $user;
+  } else {
+    $user = user_load($uid);
+  }
+  
+  return (is_numeric($role)) ? in_array($role, array_keys($user->roles)) : in_array($role, $user->roles);
+}
+
+/**
  * Implementation of hook_cron().
  */
 function alogo_utils_cron() {
