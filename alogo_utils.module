@@ -14,11 +14,11 @@
 function alogo_utils_read_record($schema, $key) {
   $key = (array) $key;
   $schema = drupal_get_schema($schema);
-  
+
   if (!$schema) {
     return FALSE;
   }
-  
+
   $pks = $schema['primary key'];
 
   // make sure we have the same ammount of values as we do primary keys
@@ -34,7 +34,7 @@ function alogo_utils_read_record($schema, $key) {
     // escape % signs
     $name = str_replace('%', '%%', $pks[$i]);
     $query .= " {$name} = ";
-    
+
     // determine variable type
     if (is_numeric($key[$i])) {
       $quotes = FALSE;
@@ -44,18 +44,19 @@ function alogo_utils_read_record($schema, $key) {
       else {
         $placeholder = '%f';
       }
-    } else {
+    }
+    else {
       // primary keys shouldn't really be binary in the first place
       $placeholder = '%s';
       $quotes = TRUE;
     }
-    
+
     if ($quotes) {
       $query .= '"';
     }
-    
+
     $query .= $placeholder;
-    
+
     if ($quotes) {
       $query .= '"';
     }
@@ -77,10 +78,11 @@ function alogo_utils_user_has_role($role, $uid = NULL) {
   // defalts to current user
   if (!$uid) {
     global $user;
-  } else {
+  }
+  else {
     $user = user_load($uid);
   }
-  
+
   return (is_numeric($role)) ? in_array($role, array_keys($user->roles)) : in_array($role, $user->roles);
 }
 
