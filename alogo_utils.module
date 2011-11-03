@@ -196,7 +196,7 @@ function alogo_docroot() {
  * Wrapper around krumo() that includes the class if not already done
  * This is useful for debugging hook_init() and other places where krumo isn't normally available
  */
-function alogo_dump() {
+function alogo_krumo() {
   include_once drupal_get_path('module', 'devel') . '/krumo/class.krumo.php';
   krumo(func_get_args());
 }
@@ -207,7 +207,7 @@ function alogo_dump() {
  *  - birthday (dd-mm-yyyy)
  */
 function alogo_get_age($bday) {
-  list($d, $m, $y) = explode('-', $bday);
+  list ($d, $m, $y) = explode('-', $bday);
   $yd = date('Y') - $y;
 
   if (date('md') < $m . $d) {
