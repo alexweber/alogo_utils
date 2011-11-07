@@ -221,12 +221,25 @@ function alogo_get_age($bday) {
  * Clean the string removing all characters except the digits
  * Talen from the module "Brazilian IDs"
  *
- * @param $cpfcnpj
- *   Original "dirty" cpfcnpf
+ * @param $cpf
+ *   Original "dirty" cpf
  * @return
- *   Returns the clean cpfcnpj
+ *   Returns the clean cpf
  */
 function alogo_clean_cpf($cpf) {
+  return preg_replace('/[^0-9]/', '', $cpf);
+}
+
+/**
+ * Clean the string removing all characters except the digits
+ * Talen from the module "Brazilian IDs"
+ *
+ * @param $cnpj
+ *   Original "dirty" cnpj
+ * @return
+ *   Returns the clean cnpj
+ */
+function alogo_clean_cnpj($cnpj) {
   return preg_replace('/[^0-9]/', '', $cpf);
 }
 
@@ -306,6 +319,37 @@ SQL;
 }
 
 /**
+ * Informa se o CNPJ é único
+ * Função feita para uso com o content_profile
+ *
+ * @param string $cnpj
+ * @param int $uid
+ * @param string $profile_table
+ * @param string $profile_field
+ * @return bool
+ */
+function alogo_unique_cnpj($cnpj, $uid = NULL, $profile_table = 'content_type_profile', $profile_field = 'field_profile_cnpj_value') {
+  $cpf_dirty = alogo_clean_cnpj($cnpj);
+
+  $query = <<<SQL
+SELECT COUNT(*) FROM {$profile_table} ctt
+INNER JOIN node n ON ctt.nid = n.nid
+WHERE ctt.{$profile_field} = '%s' OR ctt.{$profile_field} = '%s'
+SQL;
+  $args = array($cpf, $cpf_dirty);
+
+  if ($uid) {
+    $query .= " AND n.uid <> %d";
+    $args[] = $uid;
+  }
+
+  array_unshift($args, $query);
+  $resource = call_user_func_array('db_query', $args);
+  $result = db_result($resource);
+  return $result == 0;
+}
+
+/**
  * Validação de CNPJ
  * @param string $cnpj
  * @return bool
@@ -354,4 +398,26 @@ function alogo_validate_cnpj($cnpj) {
   }
 
   return TRUE;
+}
+
+/**
+ * Returns a fully-processed node form as an array
+ * This works in cases where drupal_retrieve_form() doesn't
+ * 
+ * @param string $type 
+ * @return array
+ * @TODO decide whether to keep this or not
+ */
+function alogo_get_node_form($type) {
+  $node = new StdClass();
+  $node_state = array();
+  $node->type = $type;
+  // for some reason this isn't always included when we need it
+  module_load_include('inc', 'node', 'node.pages');
+  // grab the node form
+  $node_form = node_form($node_state, $node);
+  // run all hooks
+  drupal_prepare_form("{$type}_node_form", $node_form);
+  // there, we have the full node form as an array
+  return $node_form;
 }
