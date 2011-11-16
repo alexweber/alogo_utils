@@ -144,17 +144,23 @@ function alogo_utils_read_record($table, $key) {
  * @return bool
  */
 function alogo_utils_user_has_role($role, $user = NULL) {
-// defalts to current user
-  if (isset($user)) {
+  // defalts to current user
+  if (!isset($user)) {
     global $user;
   }
+  // accept a uid
   else {
     if (is_numeric($user)) {
       $user = user_load($user);
     }
   }
 
-  return (is_numeric($role)) ? in_array($role, array_keys($user->roles)) : in_array($role, $user->roles);
+  // make sure we have a valid user object
+  if (is_object($user) && isset($user->roles) && is_array($user->roles)) {
+    return (is_numeric($role)) ? in_array($role, array_keys($user->roles)) : in_array($role, $user->roles);
+  }
+
+  return FALSE;
 }
 
 /**
