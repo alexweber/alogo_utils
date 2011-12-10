@@ -14,7 +14,7 @@
  * @param stdClass $object 
  * @return bool
  */
-function alogo_utils_write_record($table, &$object) {
+function alogo_write_record($table, &$object) {
   $schema = drupal_get_schema($table);
 
   if (!$schema) {
@@ -80,7 +80,7 @@ function alogo_utils_write_record($table, &$object) {
  * @param mixed $key A single value or an array of values
  * @return array
  */
-function alogo_utils_read_record($table, $key) {
+function alogo_read_record($table, $key) {
   $key = (array) $key;
   $schema = drupal_get_schema($table);
 
@@ -143,7 +143,7 @@ function alogo_utils_read_record($table, $key) {
  * @param int|stdClass $uid 
  * @return bool
  */
-function alogo_utils_user_has_role($role, $user = NULL) {
+function alogo_user_has_role($role, $user = NULL) {
   // defalts to current user
   if (!isset($user)) {
     global $user;
@@ -246,7 +246,7 @@ function alogo_clean_cpf($cpf) {
  *   Returns the clean cnpj
  */
 function alogo_clean_cnpj($cnpj) {
-  return preg_replace('/[^0-9]/', '', $cpf);
+  return preg_replace('/[^0-9]/', '', $cnpj);
 }
 
 /**
@@ -335,14 +335,12 @@ SQL;
  * @return bool
  */
 function alogo_unique_cnpj($cnpj, $uid = NULL, $profile_table = 'content_type_profile', $profile_field = 'field_profile_cnpj_value') {
-  $cpf_dirty = alogo_clean_cnpj($cnpj);
-
   $query = <<<SQL
 SELECT COUNT(*) FROM {$profile_table} ctt
 INNER JOIN node n ON ctt.nid = n.nid
 WHERE ctt.{$profile_field} = '%s' OR ctt.{$profile_field} = '%s'
 SQL;
-  $args = array($cpf, $cpf_dirty);
+  $args = array($cnpj, $cnpj_dirty);
 
   if ($uid) {
     $query .= " AND n.uid <> %d";
@@ -361,10 +359,13 @@ SQL;
  * @return bool
  */
 function alogo_validate_cnpj($cnpj) {
-  $forbidden = array('00000000000000', '11111111111111', '22222222222222', '33333333333333', '44444444444444', '55555555555555', '66666666666666', '77777777777777', '88888888888888', '99999999999999');
+  $cnpj_dirty = $cnpj;
+  $cnpj = alogo_clean_cnpj($cnpj);
 
-// Check if its not a forbidden combination
-  if (drupal_strlen($cpf) !== 14 || in_array($cnpj, $forbidden)) {
+  $forbidden = array('00000000000000', '11111111111111', '22222222222222', '33333333333333', '44444444444444', '55555555555555', '66666666666666', '77777777777777', '88888888888888', '99999999999999');
+  
+  // Check if its not a forbidden combination
+  if (drupal_strlen($cnpj) !== 14 || in_array($cnpj, $forbidden)) {
     return FALSE;
   }
 
@@ -408,11 +409,10 @@ function alogo_validate_cnpj($cnpj) {
 
 /**
  * Returns a fully-processed node form as an array
- * This works in cases where drupal_retrieve_form() doesn't
+ * This should work in cases where drupal_retrieve_form() doesn't
  * 
  * @param string $type 
  * @return array
- * @TODO decide whether to keep this or not
  */
 function alogo_get_node_form($type) {
   $node = new StdClass();
@@ -424,6 +424,19 @@ function alogo_get_node_form($type) {
   $node_form = node_form($node_state, $node);
   // run all hooks
   drupal_prepare_form("{$type}_node_form", $node_form);
-  // there, we have the full node form as an array
+  // there, we have the full node form as an array, horray
   return $node_form;
+}
+
+/**
+ * Returns whether the email address is unique or not
+ * This is necessary in cases when we have a custom registration workflow
+ * 
+ * @param string $email 
+ * @return bool
+ */
+function alogo_unique_email($email) {
+  $query = "SELECT COUNT(*) FROM users WHERE mail = '%s'";
+  $result = db_result(db_query($query, $email));
+  return $result === 0;
 }

@@ -10,7 +10,7 @@
 function alogo_env_drush_help($section) {
   switch ($section) {
     case 'env':
-      return t('Switches website environment between development, staging and production mode.');
+      return 'Switches website environment between development, staging and production mode.';
   }
 }
 
@@ -21,15 +21,15 @@ function alogo_env_drush_command() {
   return array(
     'env' => array(
       'callback' => '_alogo_env_drush_env',
-      'description' => t("Switches website environment between development, staging and production mode. Specify the environment as an argument: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment."),
+      'description' => "Switches website environment between development, staging and production mode. Specify the environment as an argument: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment.",
       'aliases' => array('es'),
       'arguments' => array(
-        'env' => t("Optional. Specify the environment: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment."),
+        'env' => "Optional. Specify the environment: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment.",
       ),
       'examples' => array(
-        'drush env d' => t('Put the site in development mode'),
-        'drush env s' => t('Put the site in staging mode'),
-        'drush env t' => t('Put the site in production mode'),
+        'drush env d' => 'Put the site in development mode',
+        'drush env s' => 'Put the site in staging mode',
+        'drush env t' => 'Put the site in production mode',
       ),
     ),
   );
@@ -95,7 +95,7 @@ function _alogo_env_drush_env($env) {
       'devel_error_handler' => 0,
       'devel_rebuild_theme_registry' => 0,
       'error_level' => 0,
-//      'page_compression' => 1,
+      'page_compression' => 1,
 //      'preprocess_css' => 1,
 //      'preprocess_js' => 1,
     ),
@@ -103,17 +103,17 @@ function _alogo_env_drush_env($env) {
 
   switch ($env) {
     case 'd':
-      $return = _alogo_env_development($modules);
+      $return = _alogo_env_development($modules, $variables);
       drush_log('Environment set to: Development', 'ok');
       $flush = TRUE;
       break;
     case 's':
-      $return = _alogo_env_staging($modules);
+      $return = _alogo_env_staging($modules, $variables);
       drush_log('Environment set to: Staging', 'ok');
       $flush = TRUE;
       break;
     case 'p':
-      $return = _alogo_env_production($modules);
+      $return = _alogo_env_production($modules, $variables);
       drush_log('Environment set to: Production', 'ok');
       $flush = TRUE;
       break;
@@ -126,6 +126,8 @@ function _alogo_env_drush_env($env) {
 
   if ($flush) {
     // Flush all caches; no need to re-implement this.
+    drush_cache_clear('all');
+    // And again
     drush_cache_clear('all');
   }
 
@@ -140,16 +142,29 @@ function _alogo_env_drush_env($env) {
  * Puts the website in production mode
  *
  * @param array $modules
+ * @param array $variables
  * @return bool
  */
-function _alogo_env_production($modules) {
+function _alogo_env_production($modules, $variables) {
   // enable/disable modules
-  foreach ($modules as $env => $list) {
+  foreach ($modules as $env => $module) {
     if ($env === 'dev') {
-      module_disable($list);
+      if (module_exists($module)) {
+        module_disable($module);
+      }
     }
     else {
-      module_enable($list);
+      if (module_exists($module)) {
+        module_enable($module);
+      }
+    }
+  }
+
+  foreach ($variables as $env => $var) {
+    if ($env === 'prod') {
+      foreach ($var as $name => $value) {
+        variable_set($name, $value);
+      }
     }
   }
 
@@ -160,9 +175,10 @@ function _alogo_env_production($modules) {
  * Puts the website in staging mode
  *
  * @param array $modules
+ * @param array $variables
  * @return bool
  */
-function _alogo_env_staging($modules) {
+function _alogo_env_staging($modules, $variables) {
   // @TODO do something unique in staging environment
   $return = _alogo_env_development($modules);
   variable_set('alogo_env', 'staging');
@@ -173,18 +189,31 @@ function _alogo_env_staging($modules) {
  * Puts the website in development mode
  *
  * @param array $modules
+ * @param array $variables
  * @return bool
  */
-function _alogo_env_development($modules) {
+function _alogo_env_development($modules, $variables) {
   // enable/disable modules
   foreach ($modules as $env => $list) {
     if ($env === 'dev') {
-      module_enable($list);
+      if (module_exists($module)) {
+        module_enable($list);
+      }
     }
     else {
-      module_disable($list);
+      if (module_exists($module)) {
+        module_disable($list);
+      }
     }
   }
 
+  foreach ($variables as $env => $var) {
+    if ($env === 'dev') {
+      foreach ($var as $name => $value) {
+        variable_set($name, $value);
+      }
+    }
+  }
+  
   variable_set('alogo_env', 'development');
 }
