@@ -22,7 +22,6 @@ function alogo_env_drush_command() {
     'env' => array(
       'callback' => '_alogo_env_drush_env',
       'description' => "Switches website environment between development, staging and production mode. Specify the environment as an argument: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment.",
-      'aliases' => array('es'),
       'arguments' => array(
         'env' => "Optional. Specify the environment: press 'd' for development, 's' for staging or 'p' for production. If you type '?' or leave out the argument the function will inform what is the current environment.",
       ),
@@ -45,17 +44,19 @@ function alogo_env_drush_command() {
  * @param string $env
  * @return bool
  */
-function _alogo_env_drush_env($env) {
+function _alogo_env_drush_env($env = NULL) {
   $modules = array(
     'dev' => array(
-      'bulk_export',
+//      'bulk_export',
       'devel',
       'devel_generate',
-      'devel_node_access',
+//      'devel_node_access',
       'context_ui',
       'imagecache_ui',
-      'panels_ipe',
-      'spaces_ui',
+      'filter_perms',
+      'module_filter',
+//      'panels_ipe',
+//      'spaces_ui',
       'views_ui',
     ),
     'prod' => array(
@@ -65,7 +66,7 @@ function _alogo_env_drush_env($env) {
       'advagg_css_compress',
       'advagg',
       'boost',
-      'headjs',
+//      'headjs',
       'path_alias_cache',
     ),
   );
@@ -82,24 +83,96 @@ function _alogo_env_drush_env($env) {
       'preprocess_js' => 0,
     ),
     'prod' => array(
+      // AdvAgg settings
+      'advagg_aggregate_mode' => 2,
+      'advagg_async_generation' => 1,
+      'advagg_async_socket_connect' => 1,
+      'advagg_bundler_active' => 1,
+      'advagg_bundler_max_css' => 4,
+      'advagg_bundler_max_js' => 4,
+      'advagg_closure' => 1,
+      'advagg_css_compressor' => 1,
+      'advagg_css_compress_agg_files' => 1,
+      'advagg_css_compress_compressor_level' => 'safe',
+      'advagg_css_compress_inline' => 1,
+      'advagg_dir_htaccess' => 0,
+      'advagg_enabled' => 1,
+      'advagg_gzip_compression' => 1,
+//      'advagg_js_compressor' => 0,
       'advagg_js_compress_agg_files' => 1,
       'advagg_js_compress_inline' => 1,
-      'advagg_css_compress_agg_files' => 1,
-      'advagg_css_compress_inline' => 1,
-      'advagg_css_compressor' => 1,
-      'advagg_css_compress_compressor_level' => 'sane',
-      'advagg_bundler_active' => 1,
-      'advagg_gzip_compression' => 1,
+      'advagg_js_compress_packer_enable' => 0,
+      'advagg_page_cache_mode' => 1,
+      'advagg_rebuild_on_flush' => 0,
       'block_cache' => 1,
-//      'cache' => 1,
+      // Boost settings
+      'boost_aggressive_cookie' => 1,
+      'boost_aggressive_gzip' => 1,
+      'boost_apache_etag' => 2,
+      'boost_apache_rfc2616' => 1,
+      'boost_apache_xheader' => 0,
+      'boost_asynchronous_output' => 1,
+      'boost_cacheability_option' => 0,
+      'boost_cacheability_pages' => 0,
+      'boost_cache_css' => 1,
+      'boost_cache_html' => 1,
+      'boost_cache_js' => 1,
+      'boost_cache_json' => 1,
+      'boost_cache_json_lifetime' => 1800,
+      'boost_cache_lifetime' => 1800,
+      'boost_cache_query' => 1,
+      'boost_cache_url_alais_src' => 1,
+      'boost_cache_xml' => 1,
+      'boost_cache_xml_lifetime' => 1800,
+      'boost_check_before_cron_expire' => 0,
+      'boost_clear_cache_offline' => 1,
+      'boost_crawl_on_cron' => 1,
+      'boost_crawl_url_alias' => 0,
+      'boost_disable_clean_url' => 0,
+      'boost_document_root' => "%{DOCUMENT_ROOT}",
+      'boost_enabled' => 1,
+      'boost_expire_cron' => 1,
+      'boost_expire_no_flush' => 0,
+      'boost_flush_all_multisite' => 0,
+      'boost_flush_cck_references' => 1,
+      'boost_flush_dir' => 0,
+      'boost_flush_front' => 1,
+      'boost_flush_menu_items' => 1,
+      'boost_flush_node_terms' => 1,
+      'boost_flush_views' => 1,
+      'boost_flush_views_insert' => 1,
+      'boost_halt_on_errors' => 1,
+      'boost_halt_on_messages' => 1,
+      'boost_ignore_flush' => 1,
+      'boost_ignore_htaccess_warning' => 0,
+      'boost_ignore_subdir_limit' => 1,
+      'boost_loopback_bypass' => 1,
+      'boost_multisite_single_db' => 0,
+      'boost_no_database' => 0,
+      'boost_only_ascii_path' => 1,
+      'boost_overwrite_file' => 0,
+      'boost_permissions_dir' => 0,
+      'boost_permissions_file' => 0,
+      'boost_push_html' => 1,
+      'boost_push_json' => 1,
+      'boost_push_xml' => 1,
+      'boost_server_name_http_host' => "%{SERVER_NAME}",
+      'boost_verbose' => 1,
+      // Other settings
+      'block_cache' => 1,
       'devel_error_handler' => 0,
       'devel_rebuild_theme_registry' => 0,
       'error_level' => 0,
       'page_compression' => 1,
-//      'preprocess_css' => 1,
-//      'preprocess_js' => 1,
     ),
   );
+  
+  // if Boost is disabled, enable standard Drupal cache variables for production mode
+  if (!function_exists('boost_menu')) {
+    $variables['prod']['preprocess_css'] = 1;
+    $variables['prod']['preprocess_js'] = 1;
+    $variables['prod']['cache'] = 1;
+  }
 
   switch ($env) {
     case 'd':
@@ -160,6 +233,7 @@ function _alogo_env_production($modules, $variables) {
     }
   }
 
+  // set variables
   foreach ($variables as $env => $var) {
     if ($env === 'prod') {
       foreach ($var as $name => $value) {
@@ -207,6 +281,7 @@ function _alogo_env_development($modules, $variables) {
     }
   }
 
+  // set variables
   foreach ($variables as $env => $var) {
     if ($env === 'dev') {
       foreach ($var as $name => $value) {
